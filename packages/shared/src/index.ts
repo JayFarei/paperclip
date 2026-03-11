@@ -118,6 +118,9 @@ export type {
   CompanyPortabilityImportRequest,
   CompanyPortabilityImportResult,
   CompanyPortabilityExportRequest,
+  ArtifactFile,
+  ArtifactTreeEntry,
+  ArtifactVersionInfo,
   EnvBinding,
   AgentEnvConfig,
   CompanySecret,
@@ -241,6 +244,13 @@ export {
   extractProjectMentionIds,
   type ParsedProjectMention,
 } from "./project-mentions.js";
+export {
+  ARTIFACT_MENTION_SCHEME,
+  buildArtifactMentionHref,
+  parseArtifactMentionHref,
+  extractArtifactPaths,
+  type ParsedArtifactMention,
+} from "./artifact-mentions.js";
 
 export {
   paperclipConfigSchema,

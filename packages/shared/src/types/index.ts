@@ -70,3 +70,8 @@ export type {
   CompanyPortabilityImportResult,
   CompanyPortabilityExportRequest,
 } from "./company-portability.js";
+export type {
+  ArtifactFile,
+  ArtifactTreeEntry,
+  ArtifactVersionInfo,
+} from "./artifact.js";

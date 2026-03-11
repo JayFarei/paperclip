@@ -1,7 +1,7 @@
 import { isValidElement, useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { parseProjectMentionHref } from "@paperclipai/shared";
+import { parseProjectMentionHref, parseArtifactMentionHref } from "@paperclipai/shared";
 import { cn } from "../lib/utils";
 import { useTheme } from "../context/ThemeContext";
 
@@ -143,6 +143,17 @@ export function MarkdownBody({ children, className }: MarkdownBodyProps) {
                   style={mentionChipStyle(parsed.color)}
                 >
                   {label}
+                </a>
+              );
+            }
+            const artifactParsed = href ? parseArtifactMentionHref(href) : null;
+            if (artifactParsed) {
+              return (
+                <a
+                  href={`/artifacts/${artifactParsed.projectUrlKey}/${artifactParsed.path}`}
+                  className="paperclip-project-mention-chip"
+                >
+                  {linkChildren}
                 </a>
               );
             }
