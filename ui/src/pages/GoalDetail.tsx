@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useParams } from "@/lib/router";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "@/lib/router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { goalsApi } from "../api/goals";
 import { projectsApi } from "../api/projects";
@@ -18,16 +18,18 @@ import { PageSkeleton } from "../components/PageSkeleton";
 import { projectUrl } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import type { Goal, Project } from "@paperclipai/shared";
 
 export function GoalDetail() {
   const { goalId } = useParams<{ goalId: string }>();
+  const navigate = useNavigate();
   const { selectedCompanyId, setSelectedCompanyId } = useCompany();
   const { openNewGoal } = useDialog();
   const { openPanel, closePanel } = usePanel();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     data: goal,
@@ -83,6 +85,17 @@ export function GoalDetail() {
     }
   });
 
+  const deleteGoal = useMutation({
+    mutationFn: () => goalsApi.remove(goalId!),
+    onSuccess: () => {
+      setShowDeleteConfirm(false);
+      if (resolvedCompanyId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.goals.list(resolvedCompanyId) });
+      }
+      navigate("/goals");
+    },
+  });
+
   const childGoals = (allGoals ?? []).filter((g) => g.parentId === goalId);
   const linkedProjects = (allProjects ?? []).filter((p) => {
     if (!goalId) return false;
@@ -122,6 +135,15 @@ export function GoalDetail() {
             {goal.level}
           </span>
           <StatusBadge status={goal.status} />
+          <div className="flex-1" />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted-foreground hover:text-destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
         </div>
 
         <InlineEditor
@@ -191,6 +213,35 @@ export function GoalDetail() {
           )}
         </TabsContent>
       </Tabs>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-background border border-border rounded-lg p-6 max-w-sm w-full mx-4 space-y-4">
+            <h3 className="text-sm font-semibold">Delete goal</h3>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete "{goal.title}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteGoal.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => deleteGoal.mutate()}
+                disabled={deleteGoal.isPending}
+              >
+                {deleteGoal.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

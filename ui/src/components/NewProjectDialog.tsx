@@ -214,7 +214,7 @@ export function NewProjectDialog() {
     >
       <DialogContent
         showCloseButton={false}
-        className={cn("p-0 gap-0", expanded ? "sm:max-w-2xl" : "sm:max-w-lg")}
+        className={cn("p-0 gap-0 flex flex-col max-h-[85vh]", expanded ? "sm:max-w-2xl" : "sm:max-w-lg")}
         onKeyDown={handleKeyDown}
       >
         {/* Header */}
@@ -248,40 +248,43 @@ export function NewProjectDialog() {
           </div>
         </div>
 
-        {/* Name */}
-        <div className="px-4 pt-4 pb-2 shrink-0">
-          <input
-            className="w-full text-lg font-semibold bg-transparent outline-none placeholder:text-muted-foreground/50"
-            placeholder="Project name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Tab" && !e.shiftKey) {
-                e.preventDefault();
-                descriptionEditorRef.current?.focus();
-              }
-            }}
-            autoFocus
-          />
+        {/* Scrollable body: Name + Description */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {/* Name */}
+          <div className="px-4 pt-4 pb-2 shrink-0">
+            <input
+              className="w-full text-lg font-semibold bg-transparent outline-none placeholder:text-muted-foreground/50"
+              placeholder="Project name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Tab" && !e.shiftKey) {
+                  e.preventDefault();
+                  descriptionEditorRef.current?.focus();
+                }
+              }}
+              autoFocus
+            />
+          </div>
+
+          {/* Description */}
+          <div className="px-4 pb-2">
+            <MarkdownEditor
+              ref={descriptionEditorRef}
+              value={description}
+              onChange={setDescription}
+              placeholder="Add description..."
+              bordered={false}
+              contentClassName={cn("text-sm text-muted-foreground", expanded ? "min-h-[220px]" : "min-h-[120px]")}
+              imageUploadHandler={async (file) => {
+                const asset = await uploadDescriptionImage.mutateAsync(file);
+                return asset.contentPath;
+              }}
+            />
+          </div>
         </div>
 
-        {/* Description */}
-        <div className="px-4 pb-2">
-          <MarkdownEditor
-            ref={descriptionEditorRef}
-            value={description}
-            onChange={setDescription}
-            placeholder="Add description..."
-            bordered={false}
-            contentClassName={cn("text-sm text-muted-foreground", expanded ? "min-h-[220px]" : "min-h-[120px]")}
-            imageUploadHandler={async (file) => {
-              const asset = await uploadDescriptionImage.mutateAsync(file);
-              return asset.contentPath;
-            }}
-          />
-        </div>
-
-        <div className="px-4 pb-3 space-y-3 border-t border-border">
+        <div className="px-4 pb-3 space-y-3 border-t border-border shrink-0">
           <div className="pt-3">
             <p className="text-sm font-medium">Where will work be done on this project?</p>
             <p className="text-xs text-muted-foreground">Add local folder and/or GitHub repo workspace hints.</p>
@@ -362,7 +365,7 @@ export function NewProjectDialog() {
         </div>
 
         {/* Property chips */}
-        <div className="flex items-center gap-1.5 px-4 py-2 border-t border-border flex-wrap">
+        <div className="flex items-center gap-1.5 px-4 py-2 border-t border-border flex-wrap shrink-0">
           {/* Status */}
           <Popover open={statusOpen} onOpenChange={setStatusOpen}>
             <PopoverTrigger asChild>
@@ -457,7 +460,7 @@ export function NewProjectDialog() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border">
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-border shrink-0">
           {createProject.isError ? (
             <p className="text-xs text-destructive">Failed to create project.</p>
           ) : (

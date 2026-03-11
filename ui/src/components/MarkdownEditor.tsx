@@ -215,6 +215,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
   // Mention state (ref kept in sync so callbacks always see the latest value)
   const [mentionState, setMentionState] = useState<MentionState | null>(null);
   const mentionStateRef = useRef<MentionState | null>(null);
+  const isSelectingMentionRef = useRef(false);
   const [mentionIndex, setMentionIndex] = useState(0);
   const mentionActive = mentionState !== null && mentions && mentions.length > 0;
   const projectColorById = useMemo(() => {
@@ -321,6 +322,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
 
   // Mention detection: listen for selection changes and input events
   const checkMention = useCallback(() => {
+    if (isSelectingMentionRef.current) return;
     if (!mentions || mentions.length === 0 || !containerRef.current) {
       mentionStateRef.current = null;
       setMentionState(null);
@@ -387,6 +389,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
           decorateProjectMentions();
         });
         mentionStateRef.current = null;
+        isSelectingMentionRef.current = false;
         setMentionState(null);
         return;
       }
@@ -464,6 +467,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
       });
 
       mentionStateRef.current = null;
+      isSelectingMentionRef.current = false;
       setMentionState(null);
     },
     [decorateProjectMentions, onChange],
@@ -526,6 +530,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
             if (e.key === "Enter" || e.key === "Tab") {
               e.preventDefault();
               e.stopPropagation();
+              isSelectingMentionRef.current = true;
               selectMention(filteredMentions[mentionIndex]);
               return;
             }
@@ -585,6 +590,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorRef, MarkdownEditorProps>
               )}
               onMouseDown={(e) => {
                 e.preventDefault(); // prevent blur
+                isSelectingMentionRef.current = true;
                 selectMention(option);
               }}
               onMouseEnter={() => setMentionIndex(i)}
